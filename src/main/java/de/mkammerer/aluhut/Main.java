@@ -1,5 +1,6 @@
 package de.mkammerer.aluhut;
 
+import de.mkammerer.aluhut.i18n.I18N;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -52,7 +53,7 @@ public class Main {
         disableUselessHeaders(server, port);
 
         ServletContextHandler handler = new ServletContextHandler();
-        ServletHolder servlet = new ServletHolder(new TestServlet());
+        ServletHolder servlet = new ServletHolder(new TestServlet(new I18N()));
         handler.addServlet(servlet, "/");
 
         server.setHandler(handler);

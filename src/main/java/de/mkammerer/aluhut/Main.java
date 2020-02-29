@@ -16,6 +16,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 
 @Slf4j
 public class Main {
@@ -52,14 +54,16 @@ public class Main {
         String host = commandLine.getOptionValue("host", "0.0.0.0");
         log.info("Starting server on {}:{}", host, port);
 
-        Server server = new Server();
+        // Maximum worker threads 200, minimum 0. This ensures that Jetty releases all worker threads after some idle time
+        ThreadPool threadPool = new QueuedThreadPool(200, 0);
+        Server server = new Server(threadPool);
 
         disableUselessHeaders(server, host, port);
         configureSkillServlet(commandLine);
 
         ServletContextHandler handler = new ServletContextHandler();
-        ServletHolder servlet = new ServletHolder(new AluhutSkillServlet(new I18N()));
-        handler.addServlet(servlet, "/maechtiger-aluhut");
+        handler.addServlet(new ServletHolder(new AluhutSkillServlet(new I18N())), "/maechtiger-aluhut");
+        handler.addServlet(new ServletHolder(new HelloServlet()), "/");
 
         server.setHandler(handler);
         server.start();

@@ -22,7 +22,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
         log.info("Started");
         Options options = new Options();
-        options.addOption("p", "port", true, "Port to run the server on");
+        options.addOption("p", "port", true, "Port to run the server on [8080]");
+        options.addOption("h", "host", true, "Host to bind to [0.0.0.0]");
         options.addOption(null, "disable-signature-verification", false, "Disables signature request validation");
 
         CommandLineParser parser = new DefaultParser();
@@ -48,11 +49,12 @@ public class Main {
 
     private static void run(CommandLine commandLine) throws Exception {
         int port = Integer.parseInt(commandLine.getOptionValue("port", "8080"));
-        log.info("Starting server on port {}", port);
+        String host = commandLine.getOptionValue("host", "0.0.0.0");
+        log.info("Starting server on {}:{}", host, port);
 
         Server server = new Server();
 
-        disableUselessHeaders(server, port);
+        disableUselessHeaders(server, host, port);
         configureSkillServlet(commandLine);
 
         ServletContextHandler handler = new ServletContextHandler();
@@ -72,12 +74,13 @@ public class Main {
         }
     }
 
-    private static void disableUselessHeaders(Server server, int port) {
+    private static void disableUselessHeaders(Server server, String host, int port) {
         HttpConfiguration httpConfig = new HttpConfiguration();
         httpConfig.setSendServerVersion(false);
         httpConfig.setSendXPoweredBy(false);
         HttpConnectionFactory httpFactory = new HttpConnectionFactory(httpConfig);
         ServerConnector httpConnector = new ServerConnector(server, httpFactory);
+        httpConnector.setHost(host);
         httpConnector.setPort(port);
         server.setConnectors(new Connector[]{httpConnector});
     }

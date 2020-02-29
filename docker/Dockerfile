@@ -10,4 +10,4 @@ COPY lib /app/lib
 # Copy application
 COPY maechtiger-aluhut-*.jar /app/app.jar
 
-CMD ["java", "-jar", "-XX:+UseSerialGC", "-Xmx128M", "/app/app.jar"]
+CMD ["java", "-XX:+ExitOnOutOfMemoryError", "-XX:+UseSerialGC", "-Xmx128M", "-jar", "/app/app.jar"]

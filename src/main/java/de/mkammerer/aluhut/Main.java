@@ -27,6 +27,7 @@ public class Main {
         options.addOption("p", "port", true, "Port to run the server on [8080]");
         options.addOption("h", "host", true, "Host to bind to [0.0.0.0]");
         options.addOption(null, "disable-signature-verification", false, "Disables signature request validation");
+        options.addOption(null, "debug", false, "Enable debug log");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine;
@@ -53,6 +54,10 @@ public class Main {
         int port = Integer.parseInt(commandLine.getOptionValue("port", "8080"));
         String host = commandLine.getOptionValue("host", "0.0.0.0");
         log.info("Starting server on {}:{}", host, port);
+        boolean debug = commandLine.hasOption("debug");
+        if (debug) {
+            log.info("Debug mode activated");
+        }
 
         // Maximum worker threads 200, minimum 0. This ensures that Jetty releases all worker threads after some idle time
         ThreadPool threadPool = new QueuedThreadPool(200, 0);
@@ -62,7 +67,7 @@ public class Main {
         configureSkillServlet(commandLine);
 
         ServletContextHandler handler = new ServletContextHandler();
-        handler.addServlet(new ServletHolder(new AluhutSkillServlet(new I18N())), "/maechtiger-aluhut");
+        handler.addServlet(new ServletHolder(new AluhutSkillServlet(new I18N(), debug)), "/maechtiger-aluhut");
         handler.addServlet(new ServletHolder(new HelloServlet()), "/");
 
         server.setHandler(handler);

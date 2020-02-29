@@ -1,0 +1,13 @@
+[Unit]
+Description=Mächtiger Aluhut
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/maechtiger-aluhut
+ExecStart=java -XX:+ExitOnOutOfMemoryError -XX:+UseSerialGC -Xms16M -Xmx128M -jar maechtiger-aluhut-*.jar --host 127.0.0.1 --port 8192
+Restart=always
+User=maechtiger-aluhut
+
+[Install]
+WantedBy=multi-user.target

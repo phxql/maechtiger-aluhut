@@ -16,12 +16,25 @@ package de.mkammerer.aluhut.handler;
 import com.amazon.ask.dispatcher.request.handler.HandlerInput;
 import com.amazon.ask.dispatcher.request.handler.RequestHandler;
 import com.amazon.ask.model.Response;
+import de.mkammerer.aluhut.i18n.I18N;
+import de.mkammerer.aluhut.util.IterableUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.amazon.ask.request.Predicates.intentName;
 
-public class ConspiracyIntent implements RequestHandler {
+@Slf4j
+public class ConspiracyIntentHandler implements RequestHandler {
+    private final I18N i18N;
+
+    public ConspiracyIntentHandler(I18N i18N) {
+        this.i18N = i18N;
+    }
+
     @Override
     public boolean canHandle(HandlerInput input) {
         return input.matches(intentName("ConspiracyIntent"));
@@ -29,12 +42,24 @@ public class ConspiracyIntent implements RequestHandler {
 
     @Override
     public Optional<Response> handle(HandlerInput input) {
-        // TODO
-        String speechText = "Hello world";
+        log.info("handle()");
+
+        ResourceBundle bundle = ResourceBundle.getBundle("aluhut-facts", I18N.parseLocale(input.getRequestEnvelope().getRequest().getLocale()));
+        String randomFact = randomElement(bundle);
+
+        String moreFacts = i18N.getString(input, I18N.Key.MORE_FACTS);
+
         return input.getResponseBuilder()
-            .withSpeech(speechText)
-            .withSimpleCard("HelloWorld", speechText)
+            .withSpeech(randomFact + " " + moreFacts)
+            .withReprompt(moreFacts)
             .build();
     }
 
+    private String randomElement(ResourceBundle bundle) {
+        Set<String> keys = bundle.keySet();
+        int element = ThreadLocalRandom.current().nextInt(keys.size());
+        String key = IterableUtil.nthElement(keys, element);
+
+        return bundle.getString(key);
+    }
 }

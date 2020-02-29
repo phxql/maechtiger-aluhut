@@ -20,7 +20,7 @@ public class I18N {
         return bundle.getString(key.name().toLowerCase());
     }
 
-    private Locale parseLocale(@Nullable String locale) {
+    public static Locale parseLocale(@Nullable String locale) {
         if (locale == null) {
             log.trace("Locale is null, using default locale '{}'", DEFAULT_LOCALE);
             return DEFAULT_LOCALE;
@@ -32,6 +32,8 @@ public class I18N {
 
     public enum Key {
         WELCOME,
-        WELCOME_REPROMPT
+        WELCOME_REPROMPT,
+        GOODBYE,
+        MORE_FACTS
     }
 }

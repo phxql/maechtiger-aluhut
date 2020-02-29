@@ -18,11 +18,13 @@ import com.amazon.ask.dispatcher.request.handler.RequestHandler;
 import com.amazon.ask.model.LaunchRequest;
 import com.amazon.ask.model.Response;
 import de.mkammerer.aluhut.i18n.I18N;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
 import static com.amazon.ask.request.Predicates.requestType;
 
+@Slf4j
 public class LaunchRequestHandler implements RequestHandler {
     private final I18N i18N;
 
@@ -37,6 +39,8 @@ public class LaunchRequestHandler implements RequestHandler {
 
     @Override
     public Optional<Response> handle(HandlerInput input) {
+        log.info("handle()");
+
         return input.getResponseBuilder()
             .withSpeech(i18N.getString(input, I18N.Key.WELCOME))
             .withReprompt(i18N.getString(input, I18N.Key.WELCOME_REPROMPT))

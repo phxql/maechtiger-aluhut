@@ -1,5 +1,6 @@
 package de.mkammerer.aluhut;
 
+import com.amazon.ask.servlet.ServletConstants;
 import de.mkammerer.aluhut.i18n.I18N;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
@@ -22,6 +23,7 @@ public class Main {
         log.info("Started");
         Options options = new Options();
         options.addOption("p", "port", true, "Port to run the server on");
+        options.addOption(null, "disable-signature-verification", false, "Disables signature request validation");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine;
@@ -51,14 +53,23 @@ public class Main {
         Server server = new Server();
 
         disableUselessHeaders(server, port);
+        configureSkillServlet(commandLine);
 
         ServletContextHandler handler = new ServletContextHandler();
-        ServletHolder servlet = new ServletHolder(new TestServlet(new I18N()));
-        handler.addServlet(servlet, "/");
+        ServletHolder servlet = new ServletHolder(new AluhutSkillServlet(new I18N()));
+        handler.addServlet(servlet, "/maechtiger-aluhut");
 
         server.setHandler(handler);
         server.start();
         server.join();
+    }
+
+    private static void configureSkillServlet(CommandLine commandLine) {
+        if (commandLine.hasOption("disable-signature-verification")) {
+            log.info("Disabling signature and timestamp verification");
+            System.setProperty(ServletConstants.TIMESTAMP_TOLERANCE_SYSTEM_PROPERTY, Long.toString(ServletConstants.MAXIMUM_TOLERANCE_MILLIS));
+            System.setProperty(ServletConstants.DISABLE_REQUEST_SIGNATURE_CHECK_SYSTEM_PROPERTY, "true");
+        }
     }
 
     private static void disableUselessHeaders(Server server, int port) {

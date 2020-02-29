@@ -5,16 +5,16 @@ import com.amazon.ask.builder.SkillConfiguration;
 import com.amazon.ask.dispatcher.request.handler.HandlerInput;
 import com.amazon.ask.dispatcher.request.handler.RequestHandler;
 import com.amazon.ask.model.Response;
+import com.amazon.ask.request.handler.adapter.impl.BaseHandlerAdapter;
 import com.amazon.ask.request.handler.chain.impl.BaseRequestHandlerChain;
 import com.amazon.ask.request.mapper.GenericRequestMapper;
 import com.amazon.ask.request.mapper.impl.BaseRequestMapper;
 import com.amazon.ask.servlet.SkillServlet;
-import de.mkammerer.aluhut.handler.CancelAndStopIntentHandler;
-import de.mkammerer.aluhut.handler.ConspiracyIntent;
-import de.mkammerer.aluhut.handler.FallbackIntentHandler;
+import de.mkammerer.aluhut.handler.ConspiracyIntentHandler;
 import de.mkammerer.aluhut.handler.HelpIntentHandler;
 import de.mkammerer.aluhut.handler.LaunchRequestHandler;
-import de.mkammerer.aluhut.handler.SessionEndedRequestHandler;
+import de.mkammerer.aluhut.handler.StopIntentHandler;
+import de.mkammerer.aluhut.handler.YesIntentHandler;
 import de.mkammerer.aluhut.i18n.I18N;
 
 import java.util.Collections;
@@ -28,18 +28,19 @@ public class AluhutSkillServlet extends SkillServlet {
     }
 
     private static Skill buildSkill(I18N i18N) {
+        final ConspiracyIntentHandler conspiracyIntentHandler = new ConspiracyIntentHandler(i18N);
         List<RequestHandler> handlers = List.of(
-            new CancelAndStopIntentHandler(),
-            new FallbackIntentHandler(),
-            new ConspiracyIntent(),
+            new StopIntentHandler(i18N),
+            conspiracyIntentHandler,
+            new YesIntentHandler(conspiracyIntentHandler),
             new HelpIntentHandler(i18N),
-            new LaunchRequestHandler(i18N),
-            new SessionEndedRequestHandler()
+            new LaunchRequestHandler(i18N)
         );
 
         return new Skill(SkillConfiguration.builder()
             .withSkillId("amzn1.ask.skill.789b02dc-3997-4f0d-8182-140aec7d9296")
             .withRequestMappers(buildMappers(handlers))
+            .withHandlerAdapters(Collections.singletonList(new BaseHandlerAdapter<>(RequestHandler.class)))
             .build()
         );
     }
